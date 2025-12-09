@@ -1,0 +1,10 @@
+services:
+  worker:
+    build: .
+    volumes:
+      - ./shared_data:/data
+    deploy:
+      resources:
+        limits:
+          cpus: '0.2'
+          memory: 50M
