@@ -1,0 +1,33 @@
+services:
+  redis:
+    image: redis:alpine
+    networks:
+      - app-network
+  api:
+    build: ./api
+    ports:
+      - "5000:5000"
+    volumes:
+      - app_data:/data
+    networks:
+      - app-network
+    depends_on:
+      - redis
+
+  worker:
+    build: ./worker
+    volumes:
+      - app_data:/data
+    networks:
+      - app-network
+    depends_on:
+      - redis
+    deploy:
+      replicas: 3
+
+volumes:
+  app_data:
+
+networks:
+  app-network:
+    driver: bridge
