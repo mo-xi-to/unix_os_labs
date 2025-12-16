@@ -1,0 +1,40 @@
+version: '3'
+
+services:
+  # 1. Брокер сообщений
+  redis:
+    image: redis:alpine
+    networks:
+      - app-network
+
+  # 2. Сервис API (Producer)
+  api:
+    build: ./api
+    ports:
+      - "5000:5000"
+    volumes:
+      - app_data:/data  # Общий том для хранения файлов
+    networks:
+      - app-network
+    depends_on:
+      - redis
+
+  # 3. Сервис Worker (Масштабируемый)
+  worker:
+    build: ./worker
+    volumes:
+      - app_data:/data  # Тот же том, чтобы воркер видел файлы API
+    networks:
+      - app-network
+    depends_on:
+      - redis
+    # Инструкция для Docker Swarm (или Compose V3 с флагом --scale)
+    deploy:
+      replicas: 3  # Запустим сразу 3 экземпляра по умолчанию (опционально)
+
+volumes:
+  app_data:
+
+networks:
+  app-network:
+    driver: bridge
